@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a1f">
+<title>Para ti, Madrecita Arelis · Feliz Cumpleaños</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Italianno&family=Manrope:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :root {
+    --bg-deep: #0a0a1f;
+    --bg-mid: #1a1335;
+    --gold: #e6c89c;
+    --gold-warm: #d4a574;
+    --copper: #b87333;
+    --cream: #fdf6e9;
+    --soft-pink: #f5d5d0;
+    --soft-blue: #a8c5e8;
+    --text-soft: rgba(253, 246, 233, 0.92);
+    --text-mute: rgba(253, 246, 233, 0.65);
+  }
+
+  body {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    background: var(--bg-deep);
+    color: var(--text-soft);
+    position: relative;
+  }
+
+  /* === FONDO ATMOSFÉRICO (z-index bajo, NUNCA bloquea clicks) === */
+  .sky {
+    position: fixed; inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(80, 40, 100, 0.5) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(180, 100, 80, 0.25) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, var(--bg-mid) 0%, var(--bg-deep) 70%);
+    pointer-events: none;
+  }
+  .stars, .particles {
+    position: fixed; inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .star {
+    position: absolute;
+    background: var(--cream);
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(253, 246, 233, 0.8);
+    animation: twinkle ease-in-out infinite;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.2; transform: scale(0.7); }
+    50% { opacity: 1; transform: scale(1); }
+  }
+  .particle {
+    position: absolute;
+    width: 4px; height: 4px;
+    background: radial-gradient(circle, var(--gold) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: float-up linear infinite;
+  }
+  @keyframes float-up {
+    0% { transform: translateY(110vh) scale(0); opacity: 0; }
+    10% { opacity: 0.8; transform: translateY(100vh) scale(1); }
+    90% { opacity: 0.6; }
+    100% { transform: translateY(-10vh) translateX(40px) scale(0.5); opacity: 0; }
+  }
+  /* Corazones SOLO se muestran en escena final (controlado por JS, z-index bajo) */
+  .hearts {
+    position: fixed; inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .heart {
+    position: absolute;
+    font-size: 18px;
+    color: #f5a8a8;
+    opacity: 0;
+    animation: heartFloat 5s ease-out infinite;
+    text-shadow: 0 0 10px rgba(245, 168, 168, 0.6);
+  }
+  @keyframes heartFloat {
+    0% { transform: translateY(100vh) scale(0); opacity: 0; }
+    20% { opacity: 1; transform: translateY(80vh) scale(1); }
+    80% { opacity: 0.6; }
+    100% { transform: translateY(-20vh) translateX(40px) scale(0.5); opacity: 0; }
+  }
+
+  /* === MAIN — CONTENIDO PRINCIPAL === */
+  main {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  /* ============================================================
+     SISTEMA DE ESCENAS:
+     - Por defecto TODAS las escenas están ocultas (display:none)
+     - La intro tiene display:flex por default
+     - Cuando una escena se vuelve :target (via #hash) se muestra
+     - JS también añade clase .active como mecanismo redundante
+     - Esto significa: FUNCIONA SIN JAVASCRIPT
+     ============================================================ */
+  .scene {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 28px 22px;
+    text-align: center;
+  }
+  /* Mostrar intro por default si no hay otro target */
+  #scene-intro { display: flex; }
+  /* Cuando hay :target, mostrar esa */
+  .scene:target { display: flex; }
+  /* Y ocultar la intro porque ya hay un target activo
+     (requiere :has — fallback: usar la clase .active controlada por JS) */
+  body:has(.scene:target) #scene-intro { display: none; }
+  /* Sistema redundante con clase .active controlada por JS */
+  .scene.js-active { display: flex !important; }
+  .scene.js-inactive { display: none !important; }
+
+  /* === TIPOGRAFÍA === */
+  .script { font-family: 'Italianno', cursive; font-weight: 400; line-height: 0.95; color: var(--cream); text-shadow: 0 2px 30px rgba(230, 200, 156, 0.3); }
+  .serif { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 300; letter-spacing: 0.04em; }
+  .small-cap { font-family: 'Manrope', Arial, sans-serif; font-weight: 300; font-size: 11px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold); opacity: 0.9; }
+
+  /* ============================================================
+     BOTONES — SIN ANIMATIONS DE ENTRADA PROBLEMÁTICAS
+     Son enlaces <a> con apariencia de botón. Funcionan SIEMPRE.
+     ============================================================ */
+  .btn {
+    display: inline-block;
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 14px 38px;
+    font-family: 'Manrope', Arial, sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    position: relative;
+    -webkit-appearance: none;
+    appearance: none;
+    margin-top: 10px;
+    /* opacity:1 SIEMPRE, sin animaciones de entrada */
+    opacity: 1;
+  }
+  .btn:hover, .btn:active, .btn:focus {
+    background: var(--gold);
+    color: var(--bg-deep);
+    box-shadow: 0 8px 30px rgba(230, 200, 156, 0.3);
+    outline: none;
+  }
+  .btn-primary {
+    /* pulse SOLO en box-shadow, no toca opacity ni transform */
+    animation: pulseRing 3s ease-in-out infinite;
+    animation-delay: 3s;
+  }
+  @keyframes pulseRing {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(230, 200, 156, 0.4); }
+    50%      { box-shadow: 0 0 0 18px rgba(230, 200, 156, 0); }
+  }
+  .btn-sm { padding: 12px 32px; font-size: 11px; }
+
+  /* === ESCENA 1: APERTURA === */
+  #scene-intro .frame { position: relative; max-width: 380px; padding: 20px 28px; }
+  #scene-intro .ornament {
+    width: 80px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 0 auto 28px;
+    position: relative;
+  }
+  #scene-intro .ornament::before {
+    content: '✦';
+    position: absolute; top: -10px; left: 50%;
+    transform: translateX(-50%);
+    color: var(--gold); font-size: 14px;
+    background: var(--bg-deep); padding: 0 8px;
+  }
+  #scene-intro .pre {
+    font-size: 13px; letter-spacing: 0.5em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 30px;
+  }
+  #scene-intro .title-script {
+    font-size: clamp(76px, 18vw, 130px);
+    margin: 14px 0;
+  }
+  #scene-intro .for-you {
+    font-style: italic; font-size: 22px;
+    color: var(--text-mute); margin-bottom: 8px;
+  }
+  #scene-intro .subtitle {
+    font-size: 17px; letter-spacing: 0.08em;
+    color: var(--text-mute);
+    margin-top: 18px; margin-bottom: 40px;
+    font-style: italic;
+  }
+
+  /* === ESCENA 2: PASTEL === */
+  #scene-cake .scene-title {
+    font-size: 14px; color: var(--gold);
+    letter-spacing: 0.4em; text-transform: uppercase;
+    margin-bottom: 4px;
+    font-family: 'Manrope', Arial, sans-serif; font-weight: 300;
+  }
+  #scene-cake .scene-subtitle {
+    font-family: 'Italianno', cursive;
+    font-size: 48px; color: var(--cream);
+    margin-bottom: 18px; line-height: 1;
+  }
+  .cake-wrap {
+    position: relative;
+    width: min(92vw, 380px);
+    margin: 0 auto;
+    filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.6))
+            drop-shadow(0 0 80px rgba(230, 200, 156, 0.15));
+  }
+  .cake-img { width: 100%; height: auto; display: block; }
+  .glow-base {
+    position: absolute;
+    bottom: 12%; left: 50%;
+    transform: translateX(-50%);
+    width: 90%; height: 30%;
+    background: radial-gradient(ellipse at center, rgba(230, 200, 156, 0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .candles-layer {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+  }
+  .candle {
+    position: absolute;
+    width: 26px; height: 38px;
+    pointer-events: auto;
+    cursor: pointer;
+    transform: translate(-50%, -100%);
+  }
+  .candle::before {
+    content: '';
+    position: absolute;
+    inset: -10px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 200, 100, 0.5) 0%, transparent 70%);
+    opacity: 0.7;
+    animation: candleGlow 1.5s ease-in-out infinite alternate;
+  }
+  @keyframes candleGlow {
+    from { opacity: 0.5; transform: scale(1); }
+    to { opacity: 0.9; transform: scale(1.15); }
+  }
+  .candle img {
+    position: absolute;
+    width: 100%; height: 100%;
+    object-fit: contain;
+    object-position: bottom center;
+    transform-origin: bottom center;
+    animation: flicker 0.18s ease-in-out infinite alternate;
+  }
+  .candle.out img { display: none; }
+  .candle.out::before { display: none; }
+  @keyframes flicker {
+    0% { transform: scale(1, 1) translateX(0); }
+    100% { transform: scale(1.05, 0.95) translateX(1px); }
+  }
+  .smoke {
+    position: absolute;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(220, 220, 220, 0.7), transparent);
+    pointer-events: none;
+    animation: smokeRise 1.6s ease-out forwards;
+  }
+  @keyframes smokeRise {
+    0% { transform: translateY(0) scale(0.5); opacity: 0.8; }
+    100% { transform: translateY(-80px) scale(2.5); opacity: 0; }
+  }
+  .instruction {
+    margin-top: 28px;
+    font-style: italic; font-size: 19px;
+    color: var(--text-mute);
+    max-width: 340px; line-height: 1.4;
+  }
+  .instruction .hint {
+    display: block;
+    font-family: 'Manrope', Arial, sans-serif;
+    font-size: 11px; letter-spacing: 0.3em;
+    color: var(--gold); margin-top: 10px;
+    text-transform: uppercase; opacity: 0.7;
+  }
+  .wish-message {
+    position: fixed;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center; justify-content: center;
+    background: radial-gradient(circle at center, rgba(10, 10, 31, 0.95) 0%, rgba(10, 10, 31, 0.85) 100%);
+    z-index: 100;
+    padding: 20px;
+  }
+  .wish-message.show { display: flex; }
+  .wish-message .big {
+    font-family: 'Italianno', cursive;
+    font-size: clamp(60px, 14vw, 100px);
+    color: var(--cream);
+    text-shadow: 0 0 40px rgba(230, 200, 156, 0.5);
+    margin-bottom: 8px;
+  }
+  .wish-message .small {
+    font-style: italic; font-size: 19px;
+    color: var(--text-mute);
+    margin-bottom: 30px; max-width: 320px;
+    padding: 0 20px; text-align: center;
+  }
+
+  /* === ESCENA 3: DEDICATORIA === */
+  #scene-dedication { padding: 40px 24px; }
+  #scene-dedication .photo-frame {
+    width: min(80vw, 260px);
+    aspect-ratio: 3/4;
+    margin: 0 auto 28px;
+    position: relative;
+    border-radius: 200px 200px 8px 8px;
+    overflow: hidden;
+    border: 2px solid var(--gold);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(230, 200, 156, 0.2);
+  }
+  #scene-dedication .photo-frame img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center 20%;
+  }
+  #scene-dedication .dedication-title {
+    font-family: 'Italianno', cursive;
+    font-size: clamp(54px, 12vw, 80px);
+    color: var(--cream); line-height: 0.95;
+    margin-bottom: 18px;
+  }
+  #scene-dedication .typewriter {
+    font-style: italic; font-size: 19px; line-height: 1.6;
+    color: var(--text-soft); max-width: 380px;
+    min-height: 200px;
+  }
+  .cursor {
+    display: inline-block; width: 2px; height: 1em;
+    background: var(--gold); vertical-align: text-bottom;
+    animation: blink 0.8s infinite; margin-left: 2px;
+  }
+  @keyframes blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+
+  /* === ESCENA 4: RECUERDOS === */
+  #scene-memories .gallery {
+    position: relative; width: 100%;
+    max-width: 360px; margin: 18px auto;
+  }
+  .memory-card {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+  }
+  .memory-card.active { display: flex; }
+  .memory-card .pic {
+    width: min(70vw, 240px);
+    aspect-ratio: 3/4;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(230, 200, 156, 0.4);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+    background: var(--bg-mid);
+    position: relative;
+    margin-bottom: 22px;
+  }
+  .memory-card .pic::before {
+    content: '';
+    position: absolute; inset: 0;
+    border: 1px solid rgba(230, 200, 156, 0.2);
+    border-radius: 5px;
+    margin: 8px;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .memory-card .pic img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center top;  /* mostrar desde arriba: no corta la frente */
+  }
+  .memory-card .quote {
+    font-family: 'Italianno', cursive;
+    font-size: 38px; color: var(--cream);
+    line-height: 1; margin-bottom: 8px;
+    max-width: 320px;
+  }
+  .memory-card .caption {
+    font-style: italic; font-size: 16px;
+    color: var(--text-mute); max-width: 320px;
+    line-height: 1.4;
+  }
+  .gallery-nav { display: flex; justify-content: center; gap: 10px; margin-top: 18px; }
+  .dot {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: rgba(230, 200, 156, 0.3);
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    position: relative;
+  }
+  .dot::after {
+    content: '';
+    position: absolute;
+    inset: 11px;
+    border-radius: 50%;
+    background: var(--gold);
+    transform: scale(0);
+    transition: transform 0.3s;
+  }
+  .dot.active::after { transform: scale(1.5); }
+
+  /* === ESCENA 5: FLORES === */
+  #scene-flowers .bouquet-stage {
+    position: relative; width: 100%;
+    max-width: 420px; margin: 8px auto 0;
+    aspect-ratio: 3/2;  /* más ancho/menos alto → flores menos abajo */
+  }
+  #scene-flowers .bouquet {
+    position: absolute; width: 60%;
+    height: auto; top: 0;  /* anclar arriba, no abajo */
+    filter: drop-shadow(0 20px 40px rgba(0,0,0,0.5));
+  }
+  #scene-flowers .bouquet.b1 { left: 5%; transform: rotate(-3deg); }
+  #scene-flowers .bouquet.b2 { right: 5%; transform: rotate(3deg); }
+  #scene-flowers .flower-message { text-align: center; margin-bottom: 12px; }
+  #scene-flowers .flower-title {
+    font-family: 'Italianno', cursive;
+    font-size: clamp(54px, 13vw, 80px);
+    color: var(--cream); line-height: 0.95;
+    margin-bottom: 14px;
+  }
+  #scene-flowers .flower-body {
+    font-style: italic; font-size: 18px;
+    color: var(--text-soft); max-width: 360px;
+    margin: 0 auto; line-height: 1.5;
+  }
+
+  /* === ESCENA 6: FINAL === */
+  #scene-final .final-content { text-align: center; max-width: 400px; }
+  #scene-final .final-pre {
+    font-family: 'Manrope', Arial, sans-serif;
+    font-size: 11px; letter-spacing: 0.5em;
+    color: var(--gold); text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  #scene-final .final-title {
+    font-family: 'Italianno', cursive;
+    font-size: clamp(70px, 17vw, 110px);
+    color: var(--cream); line-height: 0.9;
+    margin-bottom: 6px;
+    text-shadow: 0 0 40px rgba(230, 200, 156, 0.4);
+  }
+  #scene-final .final-name {
+    font-family: 'Italianno', cursive;
+    font-size: clamp(54px, 13vw, 80px);
+    color: var(--gold); line-height: 1;
+    margin-bottom: 26px;
+  }
+  #scene-final .final-body {
+    font-style: italic; font-size: 18px;
+    color: var(--text-soft); line-height: 1.6;
+    margin-bottom: 30px;
+  }
+  #scene-final .signature {
+    font-family: 'Italianno', cursive;
+    font-size: 36px; color: var(--gold);
+  }
+  #scene-final .restart { margin-top: 30px; }
+
+  .confetti-piece {
+    position: fixed;
+    width: 8px; height: 14px;
+    top: -20px; z-index: 50;
+    animation: confettiFall linear forwards;
+    pointer-events: none;
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(0) rotate(0); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  .audio-toggle {
+    position: fixed;
+    top: 16px; right: 16px;
+    z-index: 200;
+    background: rgba(10, 10, 31, 0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(230, 200, 156, 0.4);
+    color: var(--gold);
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    padding: 0;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  @media (max-height: 700px) {
+    #scene-intro .title-script { font-size: clamp(60px, 14vw, 100px); }
+    .cake-wrap { width: min(70vw, 300px); }
+  }
+  @media (min-width: 768px) {
+    .scene { padding: 50px; }
+    #scene-flowers .bouquet { width: 50%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sky"></div>
+<div class="stars" id="stars"></div>
+<div class="particles" id="particles"></div>
+<div class="hearts" id="hearts"></div>
+
+<button class="audio-toggle" id="audioToggle" type="button" aria-label="Música">♪</button>
+
+<main>
+  <!-- ESCENA 1: APERTURA -->
+  <section class="scene" id="scene-intro">
+    <div class="frame">
+      <div class="ornament"></div>
+      <div class="pre">Una dedicatoria muy especial</div>
+      <div class="for-you serif">para mi</div>
+      <h1 class="script title-script">madrecita</h1>
+      <div class="subtitle">Arelis Girón · en tu día más bonito</div>
+      <a href="#scene-cake" class="btn btn-primary" id="startBtn">Comenzar &nbsp;→</a>
+    </div>
+  </section>
+
+  <!-- ESCENA 2: PASTEL -->
+  <section class="scene" id="scene-cake">
+    <div class="scene-title">Feliz cumpleaños, madrecita</div>
+    <div class="scene-subtitle">pide tu deseo</div>
+
+    <div class="cake-wrap" id="cakeWrap">
+      <img src="images/cake.png" class="cake-img" alt="Pastel de cumpleaños">
+      <div class="glow-base"></div>
+      <div class="candles-layer" id="candlesLayer"></div>
+    </div>
+
+    <p class="instruction">
+      Las velitas están encendidas para ti…<br>
+      <span class="hint">toca cada una para soplarla</span>
+    </p>
+
+    <div class="wish-message" id="wishMessage">
+      <div class="big">tu deseo</div>
+      <div class="small">se hará realidad, madrecita ✨</div>
+      <a href="#scene-dedication" class="btn btn-sm">continuar &nbsp;→</a>
+    </div>
+  </section>
+
+  <!-- ESCENA 3: DEDICATORIA -->
+  <section class="scene" id="scene-dedication">
+    <div class="photo-frame">
+      <img src="images/mom_blue.png" alt="Mamá Arelis">
+    </div>
+    <h2 class="dedication-title">para ti, Arelis</h2>
+    <p class="typewriter" id="typewriter">Madrecita Arelis, eres la persona más importante de mi vida. Cada día agradezco al cielo por tenerte. Tu amor me sostiene, tu fuerza me inspira, tu sonrisa me da paz.<br><br>Hoy quiero recordarte lo mucho que vales y lo mucho que te amo.</p>
+    <a href="#scene-memories" class="btn btn-sm" style="margin-top:28px;">recuerdos &nbsp;→</a>
+  </section>
+
+  <!-- ESCENA 4: RECUERDOS -->
+  <section class="scene" id="scene-memories">
+    <div class="scene-title small-cap">Recuerdos del corazón</div>
+    <div class="scene-subtitle script" style="font-family:'Italianno',cursive;font-size:44px;color:var(--cream);margin-bottom:18px;line-height:1;">así te recuerdo</div>
+
+    <div class="gallery" id="gallery">
+      <div class="memory-card active">
+        <div class="pic"><img src="images/mom_pink.png" alt=""></div>
+        <p class="quote">tu alegría</p>
+        <p class="caption">esa sonrisa que ilumina cualquier día gris</p>
+      </div>
+      <div class="memory-card">
+        <div class="pic"><img src="images/mom_blue.png" alt=""></div>
+        <p class="quote">tu ternura</p>
+        <p class="caption">la mirada que me ha cuidado siempre</p>
+      </div>
+      <div class="memory-card">
+        <div class="pic"><img src="images/mom_crown.png" alt=""></div>
+        <p class="quote">tu belleza</p>
+        <p class="caption">por dentro y por fuera, eres luz</p>
+      </div>
+    </div>
+
+    <div class="gallery-nav" id="galleryNav">
+      <button class="dot active" data-i="0" type="button" aria-label="Foto 1"></button>
+      <button class="dot" data-i="1" type="button" aria-label="Foto 2"></button>
+      <button class="dot" data-i="2" type="button" aria-label="Foto 3"></button>
+    </div>
+
+    <a href="#scene-flowers" class="btn btn-sm" style="margin-top:20px;">flores para ti &nbsp;→</a>
+  </section>
+
+  <!-- ESCENA 5: FLORES -->
+  <section class="scene" id="scene-flowers">
+    <div class="flower-message">
+      <h2 class="flower-title">para ti, madrecita</h2>
+      <p class="flower-body">
+        Si pudiera darte un ramo por cada vez que me has hecho sonreír,<br>
+        el mundo entero no tendría suficientes flores.
+      </p>
+    </div>
+    <div class="bouquet-stage">
+      <img src="images/bouquet_blue_white.png" class="bouquet b1" alt="">
+      <img src="images/bouquet_starry.png" class="bouquet b2" alt="">
+    </div>
+    <a href="#scene-final" class="btn btn-sm" style="margin-top:24px;">un último mensaje &nbsp;→</a>
+  </section>
+
+  <!-- ESCENA 6: FINAL -->
+  <section class="scene" id="scene-final">
+    <div class="final-content">
+      <div class="final-pre">con todo mi corazón</div>
+      <h2 class="final-title">feliz cumpleaños</h2>
+      <h2 class="final-name">madrecita Arelis</h2>
+      <p class="final-body">
+        Gracias por ser mi hogar, mi refugio, mi mejor amiga.<br><br>
+        Por cada abrazo, cada consejo, cada sacrificio silencioso. Hoy y siempre, te celebro a ti.
+      </p>
+      <p class="signature">— con todo mi amor</p>
+      <div class="restart">
+        <a href="#scene-intro" class="btn btn-sm">volver al inicio</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function() {
+  'use strict';
+
+  // ========= AMBIENTE =========
+  function makeStars() {
+    var sky = document.getElementById('stars');
+    if (!sky) return;
+    for (var i = 0; i < 80; i++) {
+      var s = document.createElement('div');
+      s.className = 'star';
+      var size = Math.random() * 2 + 1;
+      s.style.width = size + 'px';
+      s.style.height = size + 'px';
+      s.style.left = (Math.random() * 100) + '%';
+      s.style.top = (Math.random() * 100) + '%';
+      s.style.animationDuration = (2 + Math.random() * 3) + 's';
+      s.style.animationDelay = (Math.random() * 3) + 's';
+      sky.appendChild(s);
+    }
+  }
+  function makeParticles() {
+    var c = document.getElementById('particles');
+    if (!c) return;
+    for (var i = 0; i < 25; i++) {
+      var p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = (Math.random() * 100) + '%';
+      var size = Math.random() * 3 + 2;
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      p.style.animationDuration = (8 + Math.random() * 12) + 's';
+      p.style.animationDelay = (Math.random() * 10) + 's';
+      c.appendChild(p);
+    }
+  }
+
+  // ========= NAVEGACIÓN DE ESCENAS (HASH + .js-active redundante) =========
+  function handleHashChange() {
+    var hash = location.hash.replace('#', '');
+    var target = hash || 'scene-intro';
+
+    // Quitar todas las clases
+    var scenes = document.querySelectorAll('.scene');
+    for (var i = 0; i < scenes.length; i++) {
+      scenes[i].classList.remove('js-active', 'js-inactive');
+    }
+
+    var active = document.getElementById(target);
+    if (!active) {
+      active = document.getElementById('scene-intro');
+    }
+    // Marcar activa la correcta, ocultar las demás
+    for (var i = 0; i < scenes.length; i++) {
+      if (scenes[i] === active) {
+        scenes[i].classList.add('js-active');
+      } else {
+        scenes[i].classList.add('js-inactive');
+      }
+    }
+
+    // Scroll al top
+    window.scrollTo(0, 0);
+
+    // Trigger por escena
+    var name = active.id.replace('scene-', '');
+    if (name === 'cake') setupCake();
+    if (name === 'memories') startPetals();
+    if (name === 'final') startHearts();
+    if (name === 'intro') resetCake();
+  }
+
+  // ========= ESCENA PASTEL =========
+  var CANDLE_POSITIONS = [
+    {x: 32, y: 12}, {x: 36, y: 15}, {x: 40, y: 14},
+    {x: 44, y: 21}, {x: 48, y: 16}, {x: 52, y: 22},
+    {x: 56, y: 13}, {x: 60, y: 20}, {x: 64, y: 13},
+    {x: 67, y: 13}, {x: 70, y: 9}
+  ];
+  var FLAME_IMGS = ['images/flame1.png', 'images/flame2.png', 'images/flame3.png'];
+  var cakeSetup = false;
+
+  function setupCake() {
+    if (cakeSetup) return;
+    cakeSetup = true;
+    var layer = document.getElementById('candlesLayer');
+    if (!layer) return;
+    layer.innerHTML = '';
+
+    CANDLE_POSITIONS.forEach(function(pos, i) {
+      var c = document.createElement('div');
+      c.className = 'candle';
+      c.style.left = pos.x + '%';
+      c.style.top = pos.y + '%';
+      var img = document.createElement('img');
+      img.src = FLAME_IMGS[i % FLAME_IMGS.length];
+      img.alt = '';
+      c.appendChild(img);
+      var onBlow = function(e) {
+        if (e) e.preventDefault();
+        blowOut(c);
+      };
+      c.addEventListener('click', onBlow);
+      c.addEventListener('touchstart', onBlow, {passive: false});
+      layer.appendChild(c);
+    });
+  }
+
+  function resetCake() {
+    cakeSetup = false;
+    var layer = document.getElementById('candlesLayer');
+    if (layer) layer.innerHTML = '';
+    var wish = document.getElementById('wishMessage');
+    if (wish) wish.classList.remove('show');
+  }
+
+  function blowOut(candle) {
+    if (candle.classList.contains('out')) return;
+    candle.classList.add('out');
+    for (var i = 0; i < 3; i++) {
+      (function(j) {
+        setTimeout(function() {
+          var smoke = document.createElement('div');
+          smoke.className = 'smoke';
+          smoke.style.left = (parseFloat(candle.style.left) + (Math.random()*4-2)) + '%';
+          smoke.style.top = (parseFloat(candle.style.top) - 5) + '%';
+          var layer = document.getElementById('candlesLayer');
+          if (layer) layer.appendChild(smoke);
+          setTimeout(function() { smoke.remove(); }, 1600);
+        }, j * 150);
+      })(i);
+    }
+    var remaining = document.querySelectorAll('.candle:not(.out)').length;
+    if (remaining === 0) {
+      setTimeout(function() {
+        var wish = document.getElementById('wishMessage');
+        if (wish) wish.classList.add('show');
+        launchConfetti();
+      }, 600);
+    }
+  }
+
+  function launchConfetti() {
+    var colors = ['#e6c89c', '#d4a574', '#f5d5d0', '#a8c5e8', '#fdf6e9'];
+    for (var i = 0; i < 80; i++) {
+      var p = document.createElement('div');
+      p.className = 'confetti-piece';
+      p.style.left = (Math.random() * 100) + '%';
+      p.style.background = colors[Math.floor(Math.random() * colors.length)];
+      p.style.animationDuration = (2.5 + Math.random() * 2.5) + 's';
+      p.style.animationDelay = (Math.random() * 0.8) + 's';
+      p.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+      document.body.appendChild(p);
+      (function(piece) {
+        setTimeout(function() { piece.remove(); }, 5500);
+      })(p);
+    }
+  }
+
+  // ========= GALERÍA =========
+  function setupGallery() {
+    var nav = document.getElementById('galleryNav');
+    if (!nav) return;
+    nav.addEventListener('click', function(e) {
+      var btn = e.target.closest('.dot');
+      if (!btn) return;
+      var idx = parseInt(btn.dataset.i, 10);
+      var cards = document.querySelectorAll('#scene-memories .memory-card');
+      var dots = document.querySelectorAll('#galleryNav .dot');
+      for (var i = 0; i < cards.length; i++) {
+        cards[i].classList.toggle('active', i === idx);
+      }
+      for (var j = 0; j < dots.length; j++) {
+        dots[j].classList.toggle('active', j === idx);
+      }
+    });
+  }
+
+  // ========= PÉTALOS =========
+  var petalsStarted = false;
+  function startPetals() {
+    if (petalsStarted) return;
+    petalsStarted = true;
+    var colors = ['#f5d5d0', '#a8c5e8', '#fdf6e9', '#e6c89c'];
+    setInterval(function() {
+      if (!document.getElementById('scene-memories').classList.contains('js-active')) return;
+      var p = document.createElement('div');
+      p.style.position = 'fixed';
+      p.style.width = '14px';
+      p.style.height = '18px';
+      p.style.borderRadius = '50% 0 50% 50%';
+      p.style.background = colors[Math.floor(Math.random() * colors.length)];
+      p.style.left = (Math.random() * 100) + '%';
+      p.style.top = '-20px';
+      p.style.zIndex = '3';
+      p.style.pointerEvents = 'none';
+      p.style.animation = 'petalFall ' + (5 + Math.random() * 4) + 's linear forwards';
+      document.body.appendChild(p);
+      setTimeout(function() { p.remove(); }, 10000);
+    }, 600);
+  }
+
+  // ========= CORAZONES =========
+  var heartsStarted = false;
+  function startHearts() {
+    if (heartsStarted) return;
+    heartsStarted = true;
+    var container = document.getElementById('hearts');
+    if (!container) return;
+    setInterval(function() {
+      if (!document.getElementById('scene-final').classList.contains('js-active')) return;
+      var h = document.createElement('div');
+      h.className = 'heart';
+      h.textContent = ['❤', '♥', '♡'][Math.floor(Math.random()*3)];
+      h.style.left = (Math.random() * 100) + '%';
+      h.style.fontSize = (16 + Math.random() * 16) + 'px';
+      h.style.animationDuration = (4 + Math.random() * 3) + 's';
+      container.appendChild(h);
+      setTimeout(function() { h.remove(); }, 7500);
+    }, 500);
+  }
+
+  // ========= AUDIO =========
+  var audioCtx = null, audioOn = false, audioInterval = null;
+  function noteFreq(n) { return 440 * Math.pow(2, (n - 69) / 12); }
+  function playNote(freq, duration, when, gain) {
+    if (gain === undefined) gain = 0.06;
+    var o = audioCtx.createOscillator();
+    var g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0, audioCtx.currentTime + when);
+    g.gain.linearRampToValueAtTime(gain, audioCtx.currentTime + when + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + when + duration);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(audioCtx.currentTime + when);
+    o.stop(audioCtx.currentTime + when + duration + 0.05);
+  }
+  var MELODY = [
+    [60, 0.5], [60, 0.5], [62, 1], [60, 1], [65, 1], [64, 2],
+    [60, 0.5], [60, 0.5], [62, 1], [60, 1], [67, 1], [65, 2],
+    [60, 0.5], [60, 0.5], [72, 1], [69, 1], [65, 1], [64, 1], [62, 2],
+    [70, 0.5], [70, 0.5], [69, 1], [65, 1], [67, 1], [65, 2]
+  ];
+  function playMelodyOnce() {
+    var t = 0, tempo = 0.4;
+    MELODY.forEach(function(item) {
+      playNote(noteFreq(item[0]), item[1] * tempo, t, 0.05);
+      t += item[1] * tempo;
+    });
+    return t * 1000;
+  }
+  function setupAudio() {
+    var btn = document.getElementById('audioToggle');
+    if (!btn) return;
+    btn.addEventListener('click', function() {
+      if (!audioCtx) {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        try { audioCtx = new AC(); } catch(e) { return; }
+      }
+      audioOn = !audioOn;
+      if (audioOn) {
+        btn.textContent = '♫';
+        var loop = function() {
+          if (!audioOn) return;
+          var dur = playMelodyOnce();
+          audioInterval = setTimeout(loop, dur + 1000);
+        };
+        loop();
+      } else {
+        btn.textContent = '♪';
+        if (audioInterval) clearTimeout(audioInterval);
+      }
+    });
+  }
+
+  // ========= INYECCIÓN DE KEYFRAMES DINÁMICOS =========
+  var dynStyle = document.createElement('style');
+  dynStyle.textContent = '@keyframes petalFall { 0%{transform:translateY(0) rotate(0); opacity:0;} 10%{opacity:0.8;} 100%{transform:translateY(110vh) translateX(60px) rotate(720deg); opacity:0;} }';
+  document.head.appendChild(dynStyle);
+
+  // ========= INIT =========
+  function init() {
+    makeStars();
+    makeParticles();
+    setupGallery();
+    setupAudio();
+
+    // Manejar navegación por hash
+    window.addEventListener('hashchange', handleHashChange);
+    handleHashChange(); // estado inicial
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+
+</body>
+</html>
